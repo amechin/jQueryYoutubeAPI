@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Learning jQuery Youtube API</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+<div class="container-fluid px-0 text-center">
+    <p class="titre display-4">jQuery Youtube API</p>
+</div>
+<div class="container text-center">
+    <p class="h5 mt-4">Que recherchez vous ?</p>
+    <div class="row form-inline d-flex justify-content-center mt-4">
+        <input type="text" name="search" id="search" class="form-control mr-1">
+        <input type="button" value="Recherche" id="searchButton" class="btn btn-outline-success form-control">
+    </div>
+
+    <div class="buttonOptions mt-4">
+        <input type="button" class="tokenClass btn btn-outline-dark" value="Précédent">
+        <input type="button" class="tokenClass btn btn-outline-dark" value="Suivant">
+    </div>
+    <div id="output"></div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    var pageToken = {};
+    $(document).ready(function () {
+        $('#searchButton').click(function () {
+            searchYoutube();
+        });
+
+        $('.tokenClass').click(function () {
+            pageToken.current = $(this).val() === 'Next' ? pageToken.nextPage : pageToken.prevPage;
+            searchYoutube();
+        });
+    });
+
+    function searchYoutube() {
+        $.ajax({
+            url: 'https://www.googleapis.com/youtube/v3/search',
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                key: 'AIzaSyD9IEotcovINuB5D3HMbYWlNEe67F6SOEY',
+                q: $('#search').val(),
+                part: 'snippet',
+                maxResults: 25,
+                pageToken: pageToken.current
+            }
+        }).done(function (data) {
+            pageToken.nextPage = data.nextPageToken;
+            pageToken.prevPage = data.prevPageToken;
+            console.log(pageToken);
+            var html = "";
+            $.each(data['items'], function (index, value) {
+                html += '<div><div class="title">' + value.snippet.title + '</div>';
+                html += '<div><div class="url"><a href="https://www.youtube.com/watch?v=' + value.id.videoId + '" target="_blank">' + value.id.videoId + '</a></div>';
+                html += '<div><img class="img-thumnail" src="' + value.snippet.thumbnails.medium.url + '"></div>';
+                html += '</div>';
+            });
+            $('#output').html(html);
+        })
+    }
+</script>
+</body>
+</html>
